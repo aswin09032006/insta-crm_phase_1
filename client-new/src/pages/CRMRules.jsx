@@ -30,71 +30,97 @@ import SettingsGroup from '../components/settings/SettingsGroup';
 import ReplyTextarea from '../components/settings/ReplyTextarea';
 
 function TargetPostsDropdown({ posts, selectedIds, onChange }) {
- const [isOpen, setIsOpen] = useState(false);
- const dropdownRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef(null);
 
- useEffect(() => {
- const handleClickOutside = (event) => {
- if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
- setIsOpen(false);
- }
- };
- document.addEventListener("mousedown", handleClickOutside);
- return () => document.removeEventListener("mousedown", handleClickOutside);
- }, []);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
- const togglePost = (id) => {
- if (selectedIds.includes(id)) {
- onChange(selectedIds.filter(postId => postId !== id));
- } else {
- onChange([...selectedIds, id]);
- }
- };
+  const togglePost = (id) => {
+    if (selectedIds.includes(id)) {
+      onChange(selectedIds.filter(postId => postId !== id));
+    } else {
+      onChange([...selectedIds, id]);
+    }
+  };
 
- return (
- <div className="relative" ref={dropdownRef}>
- <button 
- type="button"
- onClick={() => setIsOpen(!isOpen)}
- className="w-full bg-[var(--color-bg-subtle)] border border-[var(--color-border-subtle)] text-[var(--color-text-main)] text-xs rounded-lg p-2 text-left flex items-center justify-between focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] hover:border-[var(--color-border-hover)] transition-colors"
- >
- <span>
- {selectedIds.length === 0 
- ? "Any post (No specific posts selected)" 
- : `${selectedIds.length} post${selectedIds.length > 1 ? 's' : ''} selected`}
- </span>
- <ChevronDown size={14} className={`text-[var(--color-text-muted)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
- </button>
+  const processedPosts = (posts || [])
+    .filter(post => {
+      if (!searchTerm) return true;
+      const desc = post.caption ? post.caption.toLowerCase() : '';
+      return desc.includes(searchTerm.toLowerCase());
+    })
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
- {isOpen && (
- <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-lg max-h-64 overflow-y-auto custom-scrollbar flex flex-col p-1">
- {(!posts || posts.length === 0) && (
- <div className="p-3 text-xs text-[var(--color-text-muted)] text-center">No posts found</div>
- )}
- {(posts || []).map(post => {
- const postId = post.id || post.mediaId;
- const d = new Date(post.timestamp).toLocaleDateString();
- const t = new Date(post.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
- const desc = post.caption ? post.caption.substring(0, 50) + '...' : 'No description';
- const isSelected = selectedIds.includes(postId);
- return (
-  <label key={postId} className="flex items-start gap-3 p-2.5 rounded-md hover:bg-[var(--color-bg-subtle)] cursor-pointer transition-colors group">
-  <Checkbox 
-  checked={isSelected} 
-  onChange={() => togglePost(postId)} 
-  className="mt-0.5"
-  />
-  <div className="flex flex-col">
- <span className="text-xs font-medium text-[var(--color-text-light)]">{d} {t}</span>
- <span className="text-xs text-[var(--color-text-main)] line-clamp-1">{desc}</span>
- </div>
- </label>
- );
- })}
- </div>
- )}
- </div>
- );
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full bg-[var(--color-bg-subtle)] border border-[var(--color-border-subtle)] text-[var(--color-text-main)] text-xs rounded-lg p-2 text-left flex items-center justify-between focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] hover:border-[var(--color-border-hover)] transition-colors"
+      >
+        <span>
+          {selectedIds.length === 0 
+            ? "Any post (No specific posts selected)" 
+            : `${selectedIds.length} post${selectedIds.length > 1 ? 's' : ''} selected`}
+        </span>
+        <ChevronDown size={14} className={`text-[var(--color-text-muted)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-lg max-h-72 flex flex-col shadow-lg overflow-hidden">
+          <div className="p-2 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] z-20">
+            <div className="relative">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+              <input 
+                type="text" 
+                placeholder="Search posts..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-[var(--color-bg-app)] border border-[var(--color-border-subtle)] text-[var(--color-text-main)] text-xs rounded-md pl-8 pr-3 py-1.5 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none"
+              />
+            </div>
+            <div className="text-[10px] text-[var(--color-text-muted)] mt-1.5 px-1 font-medium">
+              Showing {processedPosts.length} of {(posts || []).length} posts
+            </div>
+          </div>
+          <div className="overflow-y-auto custom-scrollbar flex-1 p-1">
+            {processedPosts.length === 0 && (
+              <div className="p-3 text-xs text-[var(--color-text-muted)] text-center">No posts found</div>
+            )}
+            {processedPosts.map(post => {
+              const postId = post.id || post.mediaId;
+              const d = new Date(post.timestamp).toLocaleDateString();
+              const t = new Date(post.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+              const desc = post.caption ? post.caption.substring(0, 50) + '...' : 'No description';
+              const isSelected = selectedIds.includes(postId);
+              return (
+                <label key={postId} className="flex items-start gap-3 p-2.5 rounded-md hover:bg-[var(--color-bg-subtle)] cursor-pointer transition-colors group">
+                  <Checkbox 
+                    checked={isSelected} 
+                    onChange={() => togglePost(postId)} 
+                    className="mt-0.5"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-[var(--color-text-light)]">{d} {t}</span>
+                    <span className="text-xs text-[var(--color-text-main)] line-clamp-1">{desc}</span>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function InstagramPreview({ text, keywords, placement }) {
