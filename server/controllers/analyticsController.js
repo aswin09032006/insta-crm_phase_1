@@ -40,36 +40,18 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getWordCloud = async (req, res) => {
   try {
-    const comments = await Comment.find({ direction: 'inbound' });
+    const Setting = require('../models/Setting');
+    const { calculateWordCloud } = require('../services/cronService');
+
+    let cache = await Setting.findOne({ key: 'wordcloud_cache' });
     
-    // Stop words to ignore
-    const stopWords = new Set([
-      'the', 'is', 'in', 'at', 'of', 'on', 'and', 'a', 'to', 'for', 'with', 'it', 'this', 'that', 
-      'i', 'you', 'my', 'your', 'we', 'they', 'he', 'she', 'was', 'are', 'as', 'by', 'be', 'or', 
-      'an', 'not', 'have', 'has', 'had', 'from', 'but', 'what', 'all', 'were', 'when', 'there', 
-      'can', 'so', 'if', 'out', 'up', 'about', 'who', 'which', 'their', 'how', 'will', 'just',
-      'like', 'do', 'don', 'out', 'get', 'me', 'am', 'are'
-    ]);
+    if (!cache || !cache.value) {
+      // If it doesn't exist yet, run the calculation synchronously just this once
+      const data = await calculateWordCloud();
+      return res.status(200).json(data || []);
+    }
 
-    const wordCounts = {};
-
-    comments.forEach(comment => {
-      if (!comment.text) return;
-      
-      const words = comment.text.toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
-      words.forEach(word => {
-        if (!stopWords.has(word)) {
-          wordCounts[word] = (wordCounts[word] || 0) + 1;
-        }
-      });
-    });
-
-    const wordCloudData = Object.keys(wordCounts)
-      .map(word => ({ text: word, value: wordCounts[word] }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 50); // top 50 words
-
-    res.status(200).json(wordCloudData);
+    res.status(200).json(cache.value);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

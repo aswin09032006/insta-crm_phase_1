@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/ui/Spinner';
 import CustomSelect from '../components/ui/CustomSelect';
@@ -226,13 +226,15 @@ export default function TasksPage() {
  }
  };
 
- const filteredTasks = tasks.filter(task => {
- if (!searchQuery) return true;
- const searchLower = searchQuery.toLowerCase();
- const matchUsername = task.leadId?.username?.toLowerCase().includes(searchLower);
- const matchNotes = task.notes?.toLowerCase().includes(searchLower);
- return matchUsername || matchNotes;
- });
+  const filteredTasks = useMemo(() => tasks.filter(task => {
+  if (!searchQuery) return true;
+  const searchLower = searchQuery.toLowerCase();
+  const matchUsername = task.leadId?.username?.toLowerCase().includes(searchLower);
+  const matchNotes = task.notes?.toLowerCase().includes(searchLower);
+  return matchUsername || matchNotes;
+  }), [tasks, searchQuery]);
+
+  const handleVisibleDataChange = useCallback((data) => setVisibleTasks(data), []);
 
  const tableColumns = [
  {
@@ -670,7 +672,7 @@ export default function TasksPage() {
   <Table 
   columns={tableColumns} 
   data={filteredTasks} 
-  onVisibleDataChange={(data) => setVisibleTasks(data)}
+  onVisibleDataChange={handleVisibleDataChange}
   />
   </div>
   </div>

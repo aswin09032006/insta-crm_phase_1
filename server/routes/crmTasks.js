@@ -14,9 +14,20 @@ router.get('/', async (req, res) => {
     if (req.query.priority) query.priority = { $in: req.query.priority.split(',') };
     if (req.query.type) query.type = { $in: req.query.type.split(',') };
     
-    if (req.query.assignees) {
+    if (req.query.assignees && req.user.role === 'admin') {
       const assignees = req.query.assignees.split(',').map(a => a === 'me' ? req.user._id : a);
       query.assignedTo = { $in: assignees };
+    } else if (req.user.role === 'agent') {
+      const Lead = require('../models/Lead');
+      const agentLeads = await Lead.find({ assignedTo: req.user._id }).select('_id');
+      const agentLeadIds = agentLeads.map(l => l._id);
+
+      query.$or = [
+        { assignedTo: req.user._id },
+        { createdBy: req.user._id },
+        { leadId: { $in: agentLeadIds }, assignedTo: null },
+        { leadId: { $in: agentLeadIds }, assignedTo: { $exists: false } }
+      ];
     }
 
     if (req.query.dateRange) {
@@ -69,7 +80,11 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const task = await Task.create({ ...req.body, assignedTo: req.body.assignedTo || req.user._id });
+    const task = await Task.create({ 
+      ...req.body, 
+      assignedTo: req.body.assignedTo !== undefined ? req.body.assignedTo : req.user._id,
+      createdBy: req.user._id
+    });
     res.status(201).json(task);
   } catch (err) {
     console.error(err);

@@ -23,6 +23,11 @@ const taskSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   leadId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Lead'

@@ -56,8 +56,8 @@ import LeadsPipeline from "./pages/LeadsPipeline";
 import TasksPage from "./pages/TasksPage";
 
 // Protected CRM Route Wrapper
-const CRMProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+const CRMProtectedRoute = ({ children, requireAdmin }) => {
+  const { isAuthenticated, loading, user } = useAuth();
   if (loading) {
     return (
       <div className="py-20 flex justify-center">
@@ -67,6 +67,9 @@ const CRMProtectedRoute = ({ children }) => {
   }
   if (!isAuthenticated) {
     return <CRMAuth />;
+  }
+  if (requireAdmin && user?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
   }
   return children;
 };
@@ -226,10 +229,10 @@ function MainApp() {
   return (
     <DashboardLayout title={getPageTitle()}>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/crm-login" element={<CRMAuth />} />
+        <Route path="" element={<Navigate to="dashboard" replace />} />
+        <Route path="crm-login" element={<CRMAuth />} />
         <Route
-          path="/leads"
+          path="leads"
           element={
             <CRMProtectedRoute>
               <LeadsPipeline />
@@ -237,7 +240,7 @@ function MainApp() {
           }
         />
         <Route
-          path="/tasks"
+          path="tasks"
           element={
             <CRMProtectedRoute>
               <TasksPage />
@@ -245,7 +248,7 @@ function MainApp() {
           }
         />
         <Route
-          path="/rules"
+          path="rules"
           element={
             <CRMProtectedRoute>
               <CRMRules
@@ -258,22 +261,8 @@ function MainApp() {
             </CRMProtectedRoute>
           }
         />
-        {/* <Route
-          path="/templates"
-          element={
-            <CRMProtectedRoute>
-              <CRMTemplates
-                settings={settings}
-                setSettings={setSettings}
-                handleSaveSettings={handleSaveSettings}
-                saveStatus={saveStatus}
-                posts={posts}
-              />
-            </CRMProtectedRoute>
-          }
-        /> */}
         <Route
-          path="/dashboard"
+          path="dashboard"
           element={
             <CRMProtectedRoute>
               <CRMAnalytics />
@@ -281,9 +270,9 @@ function MainApp() {
           }
         />
         <Route
-          path="/admin/create-account"
+          path="admin/create-account"
           element={
-            <CRMProtectedRoute>
+            <CRMProtectedRoute requireAdmin>
               <AdminAccountCreation />
             </CRMProtectedRoute>
           }

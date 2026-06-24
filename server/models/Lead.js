@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 const leadSchema = new mongoose.Schema({
   username: {
-    type: String,
-    required: true
+    type: String
   },
   platformUserId: {
     type: String,

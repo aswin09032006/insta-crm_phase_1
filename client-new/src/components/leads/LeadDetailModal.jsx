@@ -265,7 +265,7 @@ export default function LeadDetailModal({ leadId, onClose }) {
  },
  body: JSON.stringify({
  leadId,
- assignedTo: taskAssignedTo || assignedTo || undefined, // Default to task assignment, fallback to lead assignment
+ assignedTo: taskAssignedTo === 'unassigned' ? null : (taskAssignedTo || assignedTo || null),
  type: taskType,
  dueAt: taskDue,
  notes: taskNotes,
@@ -835,19 +835,20 @@ export default function LeadDetailModal({ leadId, onClose }) {
 
  {user?.role === 'admin' && (
  <div className="space-y-1">
- <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Assign To</label>
- <CustomSelect
- value={taskAssignedTo}
- onChange={(e) => setTaskAssignedTo(e.target.value)}
- options={[
- ...(user ? [{ value: user.id || user._id, label: "Assign to Me" }] : []),
- ...agents
- .filter(a => String(a._id) !== String(user?.id || user?._id))
- .map(a => ({ value: a._id, label: `${a.name} (${a.role})` }))
- ]}
- className="w-full"
- />
- </div>
+  <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Assign To</label>
+  <CustomSelect
+  value={taskAssignedTo || assignedTo || 'unassigned'}
+  onChange={(e) => setTaskAssignedTo(e.target.value)}
+  options={[
+  { value: "unassigned", label: "Unassigned" },
+  ...(user ? [{ value: user.id || user._id, label: "Assign to Me" }] : []),
+  ...agents
+  .filter(a => String(a._id) !== String(user?.id || user?._id))
+  .map(a => ({ value: a._id, label: `${a.name} (${a.role})` }))
+  ]}
+  className="w-full"
+  />
+  </div>
  )}
  </div>
 

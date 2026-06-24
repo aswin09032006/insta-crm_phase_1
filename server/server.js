@@ -11,6 +11,10 @@ dotenv.config();
 // Connect to database
 connectDB();
 
+// Initialize Cron Jobs
+const { initCronJobs } = require('./services/cronService');
+initCronJobs();
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -259,7 +263,7 @@ app.post('/api/auth/crm/login', async (req, res) => {
         return res.json({
           accessToken: data.token,
           refreshToken: data.token, // Mock refresh token
-          user: { _id: data._id, name: data.name, email: data.email, role: 'admin' }
+          user: { _id: data._id, name: data.name, email: data.email, role: data.role || 'admin' }
         });
       }
       return res.status(401).json(data);
@@ -273,7 +277,7 @@ app.post('/api/auth/crm/register', async (req, res) => {
     status: (code) => ({ json: (data) => res.status(code).json(data) }),
     json: (data) => {
       if (data.success && data.token) {
-        return res.json({ accessToken: data.token, refreshToken: data.token, user: { _id: data._id, name: data.name, email: data.email, role: 'admin' } });
+        return res.json({ accessToken: data.token, refreshToken: data.token, user: { _id: data._id, name: data.name, email: data.email, role: data.role || 'admin' } });
       }
       return res.status(400).json(data);
     }

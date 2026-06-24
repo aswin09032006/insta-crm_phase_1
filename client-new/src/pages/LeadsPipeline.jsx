@@ -286,7 +286,7 @@ export default function LeadsPipeline() {
  'Authorization': `Bearer ${token}`
  },
  body: JSON.stringify({
- username: newUsername.trim(),
+ username: newUsername.trim() || undefined,
  platformUserId: newPUserId.trim() || undefined,
  platform: newPlatform === 'other' ? newOtherPlatform.trim() : newPlatform,
  name: newName.trim(),
@@ -296,6 +296,7 @@ export default function LeadsPipeline() {
  status: newStatus,
  priority: newPriority,
  notes: newNotes.trim(),
+ source: 'manual',
  tags: newTags.split(',').map(t => t.trim()).filter(Boolean)
  })
  });

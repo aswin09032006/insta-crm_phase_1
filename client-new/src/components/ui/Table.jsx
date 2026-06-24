@@ -61,11 +61,23 @@ export default function Table({
 
  const totalPages = itemsPerPage > 0 ? Math.ceil(data.length / itemsPerPage) : 1;
 
+ const onVisibleDataChangeRef = React.useRef(onVisibleDataChange);
+ const prevProcessedIdsRef = React.useRef(null);
+
  useEffect(() => {
-   if (onVisibleDataChange) {
-     onVisibleDataChange(processedData);
+   onVisibleDataChangeRef.current = onVisibleDataChange;
+ }, [onVisibleDataChange]);
+
+ useEffect(() => {
+   if (onVisibleDataChangeRef.current) {
+     // Compare by IDs to avoid triggering parent re-renders for identical data
+     const newIds = processedData.map(d => d._id || d.id).join(',');
+     if (prevProcessedIdsRef.current !== newIds) {
+       prevProcessedIdsRef.current = newIds;
+       onVisibleDataChangeRef.current(processedData);
+     }
    }
- }, [processedData, onVisibleDataChange]);
+ }, [processedData]);
 
  return (
  <div className={`w-full flex flex-col ${className}`}>
