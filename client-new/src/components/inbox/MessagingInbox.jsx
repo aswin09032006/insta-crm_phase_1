@@ -1,3 +1,4 @@
+import { API_URL } from '../../config';
 import React, { useState, useEffect } from 'react';
 import { Send, MessageCircle, Reply, FileText, X } from 'lucide-react';
 import Spinner from '../ui/Spinner';
@@ -53,7 +54,7 @@ export default function MessagingInbox({ messages }) {
  if (!replyText.trim() || !selectedUser) return;
  setSending(true);
  try {
- const res = await fetch('http://localhost:5000/api/messages/send', {
+ const res = await fetch(`${API_URL}/api/messages/send`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ recipientId: selectedUser, text: replyText })
@@ -90,7 +91,7 @@ export default function MessagingInbox({ messages }) {
  // Mark seen when opening a chat
  useEffect(() => {
  if (selectedUser) {
- fetch('http://localhost:5000/api/messages/seen', {
+ fetch(`${API_URL}/api/messages/seen`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ recipientId: selectedUser })
@@ -104,7 +105,7 @@ export default function MessagingInbox({ messages }) {
 
  useEffect(() => {
  if (token) {
- fetch('http://localhost:5000/api/rules-templates/templates', {
+ fetch(`${API_URL}/api/rules-templates/templates`, {
  headers: { 'Authorization': `Bearer ${token}` }
  })
  .then(res => res.json())

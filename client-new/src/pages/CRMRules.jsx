@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/ui/Spinner';
@@ -181,7 +182,7 @@ export default function CRMRules({ settings, setSettings, handleSaveSettings, sa
 
  const fetchRules = async () => {
  try {
- const res = await fetch('http://localhost:5000/api/rules-templates/rules', {
+ const res = await fetch(`${API_URL}/api/rules-templates/rules`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  const data = await res.json();

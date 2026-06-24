@@ -1,3 +1,4 @@
+import { API_URL } from '../../config';
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, ExternalLink, Image as ImageIcon, X, Smile, FileText } from 'lucide-react';
 import Spinner from '../ui/Spinner';
@@ -16,7 +17,7 @@ function GridPostItem({ mediaId, commentsCount, post, onClick }) {
  }
  const fetchMedia = async () => {
  try {
- const res = await fetch(`http://localhost:5000/api/media/${mediaId}`);
+ const res = await fetch(`${API_URL}/api/media/${mediaId}`);
  if (res.ok) {
  const data = await res.json();
  setMedia(data);
@@ -69,7 +70,7 @@ function InstagramPostModal({ mediaId, onClose, onCommentsFetched, searchQuery }
  const handleContentClick = (e) => e.stopPropagation();
 
  useEffect(() => {
- fetch('http://localhost:5000/api/connection-status')
+ fetch(`${API_URL}/api/connection-status`)
  .then(res => res.json())
  .then(data => setAccountInfo(data))
  .catch(err => console.error('Failed to fetch account info', err));
@@ -77,7 +78,7 @@ function InstagramPostModal({ mediaId, onClose, onCommentsFetched, searchQuery }
 
  useEffect(() => {
  if (token) {
- fetch('http://localhost:5000/api/rules-templates/templates', {
+ fetch(`${API_URL}/api/rules-templates/templates`, {
  headers: { 'Authorization': `Bearer ${token}` }
  })
  .then(res => res.json())
@@ -93,7 +94,7 @@ function InstagramPostModal({ mediaId, onClose, onCommentsFetched, searchQuery }
  useEffect(() => {
  const fetchMedia = async () => {
  try {
- const res = await fetch(`http://localhost:5000/api/media/${mediaId}`);
+ const res = await fetch(`${API_URL}/api/media/${mediaId}`);
  if (res.ok) {
  const data = await res.json();
  setMedia(data);
@@ -114,7 +115,7 @@ function InstagramPostModal({ mediaId, onClose, onCommentsFetched, searchQuery }
  useEffect(() => {
  const fetchComments = async () => {
  try {
- const res = await fetch(`http://localhost:5000/api/account/posts/${mediaId}/comments`);
+ const res = await fetch(`${API_URL}/api/account/posts/${mediaId}/comments`);
  if (res.ok) {
  const data = await res.json();
  setComments(data);
@@ -344,7 +345,7 @@ export default function CommentsInbox({ comments }) {
 
  useEffect(() => {
  // Fetch posts
- fetch('http://localhost:5000/api/account/posts')
+ fetch(`${API_URL}/api/account/posts`)
  .then(res => res.json())
  .then(data => {
  if (!data.error) {
@@ -358,7 +359,7 @@ export default function CommentsInbox({ comments }) {
  });
 
  // Fetch dynamic bot username to identify replies correctly
- fetch('http://localhost:5000/api/connection-status')
+ fetch(`${API_URL}/api/connection-status`)
  .then(res => res.json())
  .then(data => {
  if (data.botUsername) {

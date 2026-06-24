@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/ui/Spinner';
@@ -36,7 +37,7 @@ export default function CRMAnalytics() {
  const handleSync = async () => {
   setIsSyncing(true);
   try {
-  const res = await fetch('http://localhost:5000/api/analytics/sync', {
+  const res = await fetch(`${API_URL}/api/analytics/sync`, {
   method: 'POST',
   headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -56,7 +57,7 @@ export default function CRMAnalytics() {
  
  setLoading(true);
  try {
- let url = 'http://localhost:5000/api/analytics/dashboard?';
+ let url = `${API_URL}/api/analytics/dashboard?`;
  if (periodType === 'preset') {
  url += `period=${period}`;
  } else {
@@ -65,7 +66,7 @@ export default function CRMAnalytics() {
 
  const [res, wordRes] = await Promise.all([
  fetch(url, { headers: { 'Authorization': `Bearer ${token}` } }),
- fetch('http://localhost:5000/api/analytics/wordcloud', { headers: { 'Authorization': `Bearer ${token}` } })
+ fetch(`${API_URL}/api/analytics/wordcloud`, { headers: { 'Authorization': `Bearer ${token}` } })
  ]);
 
  if (res.ok) {

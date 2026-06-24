@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/ui/Spinner';
@@ -120,7 +121,7 @@ export default function LeadsPipeline() {
           if (afterMedia) params.append('afterMedia', afterMedia);
           if (afterTags) params.append('afterTags', afterTags);
           
-          const res = await fetch(`http://localhost:5000/api/account/posts?${params.toString()}`, {
+          const res = await fetch(`${API_URL}/api/account/posts?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
@@ -196,7 +197,7 @@ export default function LeadsPipeline() {
  
  params.append('sort', sortBy);
 
- const res = await fetch(`http://localhost:5000/api/leads?${params.toString()}`, {
+ const res = await fetch(`${API_URL}/api/leads?${params.toString()}`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  const data = await res.json();
@@ -229,7 +230,7 @@ export default function LeadsPipeline() {
  );
 
  try {
- const res = await fetch(`http://localhost:5000/api/leads/${leadId}`, {
+ const res = await fetch(`${API_URL}/api/leads/${leadId}`, {
  method: 'PUT',
  headers: {
  'Content-Type': 'application/json',
@@ -279,7 +280,7 @@ export default function LeadsPipeline() {
  setAddError(null);
 
  try {
- const res = await fetch('http://localhost:5000/api/leads', {
+ const res = await fetch(`${API_URL}/api/leads`, {
  method: 'POST',
  headers: {
  'Content-Type': 'application/json',
@@ -340,7 +341,7 @@ export default function LeadsPipeline() {
  const confirmDelete = async () => {
  setIsDeleting(true);
  try {
- const res = await fetch('http://localhost:5000/api/leads/bulk-delete', {
+ const res = await fetch(`${API_URL}/api/leads/bulk-delete`, {
  method: 'POST',
  headers: {
  'Content-Type': 'application/json',

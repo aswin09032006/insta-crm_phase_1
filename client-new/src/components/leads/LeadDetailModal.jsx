@@ -1,3 +1,4 @@
+import { API_URL } from '../../config';
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -81,7 +82,7 @@ export default function LeadDetailModal({ leadId, onClose }) {
 
  useEffect(() => {
  if (token) {
- fetch('http://localhost:5000/api/rules-templates/templates', {
+ fetch(`${API_URL}/api/rules-templates/templates`, {
  headers: { 'Authorization': `Bearer ${token}` }
  })
  .then(res => res.json())
@@ -99,25 +100,25 @@ export default function LeadDetailModal({ leadId, onClose }) {
  setLoading(true);
  try {
  // Fetch single lead details
- const leadRes = await fetch(`http://localhost:5000/api/leads/${leadId}`, {
+ const leadRes = await fetch(`${API_URL}/api/leads/${leadId}`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  const leadData = await leadRes.json();
  
  // Fetch timeline details
- const timelineRes = await fetch(`http://localhost:5000/api/leads/${leadId}/timeline`, {
+ const timelineRes = await fetch(`${API_URL}/api/leads/${leadId}/timeline`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  const timelineData = await timelineRes.json();
 
  // Fetch agents
- const agentsRes = await fetch('http://localhost:5000/api/leads/agents', {
+ const agentsRes = await fetch(`${API_URL}/api/leads/agents`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  const agentsData = await agentsRes.json();
 
  // Fetch tasks for this lead
- const tasksRes = await fetch(`http://localhost:5000/api/tasks?leadId=${leadId}`, {
+ const tasksRes = await fetch(`${API_URL}/api/tasks?leadId=${leadId}`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  const tasksData = await tasksRes.json();
@@ -171,7 +172,7 @@ export default function LeadDetailModal({ leadId, onClose }) {
  const handleSaveDetails = async () => {
  setSaving(true);
  try {
- const res = await fetch(`http://localhost:5000/api/leads/${leadId}`, {
+ const res = await fetch(`${API_URL}/api/leads/${leadId}`, {
  method: 'PUT',
  headers: {
  'Content-Type': 'application/json',
@@ -221,7 +222,7 @@ export default function LeadDetailModal({ leadId, onClose }) {
  if (!replyText.trim() || !lead?.platformUserId) return;
  setSendingMessage(true);
  try {
- const res = await fetch('http://localhost:5000/api/messages/send', {
+ const res = await fetch(`${API_URL}/api/messages/send`, {
  method: 'POST',
  headers: {
  'Content-Type': 'application/json',
@@ -232,7 +233,7 @@ export default function LeadDetailModal({ leadId, onClose }) {
  if (res.ok) {
  setReplyText('');
  // fetch timeline again to update UI
- const timelineRes = await fetch(`http://localhost:5000/api/leads/${leadId}/timeline`, {
+ const timelineRes = await fetch(`${API_URL}/api/leads/${leadId}/timeline`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  if (timelineRes.ok) {
@@ -257,7 +258,7 @@ export default function LeadDetailModal({ leadId, onClose }) {
  setAddingTask(true);
 
  try {
- const res = await fetch('http://localhost:5000/api/tasks', {
+ const res = await fetch(`${API_URL}/api/tasks`, {
  method: 'POST',
  headers: {
  'Content-Type': 'application/json',
@@ -299,7 +300,7 @@ export default function LeadDetailModal({ leadId, onClose }) {
  );
 
  try {
- const res = await fetch(`http://localhost:5000/api/tasks/${task._id}`, {
+ const res = await fetch(`${API_URL}/api/tasks/${task._id}`, {
  method: 'PUT',
  headers: {
  'Content-Type': 'application/json',
@@ -331,7 +332,7 @@ export default function LeadDetailModal({ leadId, onClose }) {
  if (!taskToDelete) return;
  setIsDeletingTask(true);
  try {
- const res = await fetch(`http://localhost:5000/api/tasks/${taskToDelete}`, {
+ const res = await fetch(`${API_URL}/api/tasks/${taskToDelete}`, {
  method: 'DELETE',
  headers: { 'Authorization': `Bearer ${token}` }
  });

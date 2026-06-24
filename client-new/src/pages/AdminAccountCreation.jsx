@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/ui/Spinner';
@@ -32,7 +33,7 @@ export default function AdminAccountCreation() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/crm/users', {
+      const res = await fetch(`${API_URL}/api/auth/crm/users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -90,7 +91,7 @@ export default function AdminAccountCreation() {
         const body = { name, email, role, isActive };
         if (password) body.password = password; // Only send password if it was changed
 
-        res = await fetch(`http://localhost:5000/api/auth/crm/users/${editingUserId}`, {
+        res = await fetch(`${API_URL}/api/auth/crm/users/${editingUserId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -100,7 +101,7 @@ export default function AdminAccountCreation() {
         });
       } else {
         // CREATE MODE
-        res = await fetch('http://localhost:5000/api/auth/crm/create-agent', {
+        res = await fetch(`${API_URL}/api/auth/crm/create-agent`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ export default function AdminAccountCreation() {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/crm/users/${u._id}`, {
+      const res = await fetch(`${API_URL}/api/auth/crm/users/${u._id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

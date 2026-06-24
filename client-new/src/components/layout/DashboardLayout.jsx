@@ -1,3 +1,4 @@
+import { API_URL } from '../../config';
 import React, { useState, useEffect } from 'react';
 import { Menu, AlertTriangle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -25,7 +26,7 @@ const DashboardLayout = ({ children, title }) => {
 
  const checkOverdueTasks = async () => {
  try {
- const res = await fetch('http://localhost:5000/api/tasks?status=pending', {
+ const res = await fetch(`${API_URL}/api/tasks?status=pending`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  if (res.ok) {

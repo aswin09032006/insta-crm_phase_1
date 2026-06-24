@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
@@ -35,7 +36,7 @@ export default function MetaReviewChecklist() {
  // Fetch connection status
  const fetchStatus = async () => {
  try {
- const res = await fetch('http://localhost:5000/api/connection-status');
+ const res = await fetch(`${API_URL}/api/connection-status`);
  if (res.ok) {
  const data = await res.json();
  setStatus(prev => ({

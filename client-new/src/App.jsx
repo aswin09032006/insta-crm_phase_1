@@ -1,3 +1,4 @@
+import { API_URL } from './config';
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation, Navigate, Link } from "react-router-dom";
 import io from "socket.io-client";
@@ -74,7 +75,7 @@ const CRMProtectedRoute = ({ children, requireAdmin }) => {
   return children;
 };
 
-const socket = io("http://localhost:5000");
+const socket = io(`${API_URL}`);
 
 function CommentsView({ comments }) {
   return (
@@ -127,7 +128,7 @@ function MainApp() {
   const location = useLocation();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/settings")
+    fetch(`${API_URL}/api/settings`)
       .then((res) => res.json())
       .then((data) => setSettings(data))
       .catch((err) => console.error("Error fetching settings:", err));
@@ -143,7 +144,7 @@ function MainApp() {
           if (afterMedia) params.append('afterMedia', afterMedia);
           if (afterTags) params.append('afterTags', afterTags);
           
-          const res = await fetch(`http://localhost:5000/api/account/posts?${params.toString()}`);
+          const res = await fetch(`${API_URL}/api/account/posts?${params.toString()}`);
           const data = await res.json();
           
           if (data.posts && data.posts.length > 0) {
@@ -186,7 +187,7 @@ function MainApp() {
   const handleSaveSettings = async () => {
     setSaveStatus("saving");
     try {
-      const response = await fetch("http://localhost:5000/api/settings", {
+      const response = await fetch(`${API_URL}/api/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),

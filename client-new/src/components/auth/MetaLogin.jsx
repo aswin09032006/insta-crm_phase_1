@@ -1,3 +1,4 @@
+import { API_URL } from '../../config';
 import { Check, LogOut, Shield } from 'lucide-react';
 import Spinner from '../ui/Spinner';
 import { useState, useEffect } from 'react';
@@ -14,7 +15,7 @@ export default function MetaLogin({ status }) {
  setLoading(true);
  setError(null);
  try {
- const res = await fetch('http://localhost:5000/api/auth/manual', {
+ const res = await fetch(`${API_URL}/api/auth/manual`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ token: manualToken.trim() })
@@ -42,7 +43,7 @@ export default function MetaLogin({ status }) {
  window.history.replaceState(null, null, window.location.pathname + window.location.search);
 
  if (accessToken) {
- fetch('http://localhost:5000/api/auth/facebook', {
+ fetch(`${API_URL}/api/auth/facebook`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ accessToken })
@@ -85,7 +86,7 @@ export default function MetaLogin({ status }) {
  const disconnect = async () => {
  setLoading(true);
  try {
- await fetch('http://localhost:5000/api/auth/disconnect', { method: 'POST' });
+ await fetch(`${API_URL}/api/auth/disconnect`, { method: 'POST' });
  } catch (err) {
  console.error(err);
  } finally {

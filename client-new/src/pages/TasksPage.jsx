@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/ui/Spinner';
@@ -88,7 +89,7 @@ export default function TasksPage() {
  if (user?.role === 'admin') {
  const fetchAgents = async () => {
  try {
- const res = await fetch('http://localhost:5000/api/leads/agents', {
+ const res = await fetch(`${API_URL}/api/leads/agents`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  if (res.ok) {
@@ -117,7 +118,7 @@ export default function TasksPage() {
  }
  params.append('sort', sortBy);
 
- const res = await fetch(`http://localhost:5000/api/tasks?${params.toString()}`, {
+ const res = await fetch(`${API_URL}/api/tasks?${params.toString()}`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  const data = await res.json();
@@ -148,7 +149,7 @@ export default function TasksPage() {
  setEditError(null);
 
  try {
- const res = await fetch(`http://localhost:5000/api/tasks/${editingTask._id}`, {
+ const res = await fetch(`${API_URL}/api/tasks/${editingTask._id}`, {
  method: 'PUT',
  headers: {
  'Content-Type': 'application/json',
@@ -209,7 +210,7 @@ export default function TasksPage() {
  setIsDeleting(true);
  try {
  await Promise.all(
- selectedTaskIds.map(id => fetch(`http://localhost:5000/api/tasks/${id}`, { 
+ selectedTaskIds.map(id => fetch(`${API_URL}/api/tasks/${id}`, { 
  method: 'DELETE', 
  headers: { 'Authorization': `Bearer ${token}` } 
  }))

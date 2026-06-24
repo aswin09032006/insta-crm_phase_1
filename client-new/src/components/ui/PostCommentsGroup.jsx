@@ -1,3 +1,4 @@
+import { API_URL } from '../../config';
 import { useState, useEffect } from 'react';
 import { ExternalLink, Image as ImageIcon } from 'lucide-react';
 import Spinner from './Spinner';
@@ -10,7 +11,7 @@ export default function PostCommentsGroup({ mediaId, comments }) {
  useEffect(() => {
  const fetchMedia = async () => {
  try {
- const res = await fetch(`http://localhost:5000/api/media/${mediaId}`);
+ const res = await fetch(`${API_URL}/api/media/${mediaId}`);
  if (res.ok) {
  const data = await res.json();
  setMedia(data);

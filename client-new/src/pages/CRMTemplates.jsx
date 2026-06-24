@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/ui/Spinner';
@@ -124,7 +125,7 @@ export default function CRMTemplates() {
 
  const fetchTemplates = async () => {
  try {
- const res = await fetch('http://localhost:5000/api/rules-templates/templates', {
+ const res = await fetch(`${API_URL}/api/rules-templates/templates`, {
  headers: { 'Authorization': `Bearer ${token}` }
  });
  const data = await res.json();
@@ -162,7 +163,7 @@ export default function CRMTemplates() {
  if (!templateToDelete) return;
  setIsDeleting(true);
  try {
- const res = await fetch(`http://localhost:5000/api/rules-templates/templates/${templateToDelete}`, {
+ const res = await fetch(`${API_URL}/api/rules-templates/templates/${templateToDelete}`, {
  method: 'DELETE',
  headers: { 'Authorization': `Bearer ${token}` }
  });
@@ -194,8 +195,8 @@ export default function CRMTemplates() {
 
  try {
  const url = editingTemplateId 
- ? `http://localhost:5000/api/rules-templates/templates/${editingTemplateId}`
- : 'http://localhost:5000/api/rules-templates/templates';
+ ? `${API_URL}/api/rules-templates/templates/${editingTemplateId}`
+ : `${API_URL}/api/rules-templates/templates`;
  
  const method = editingTemplateId ? 'PUT' : 'POST';
 

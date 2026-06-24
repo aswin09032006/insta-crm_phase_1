@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
@@ -12,7 +13,7 @@ export const AuthProvider = ({ children }) => {
  const storedToken = localStorage.getItem('crm_access_token');
  if (storedToken) {
  try {
- const res = await fetch('http://localhost:5000/api/auth/crm/me', {
+ const res = await fetch(`${API_URL}/api/auth/crm/me`, {
  headers: {
  'Authorization': `Bearer ${storedToken}`
  }
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
  }
 
  try {
- const res = await fetch('http://localhost:5000/api/auth/crm/refresh', {
+ const res = await fetch(`${API_URL}/api/auth/crm/refresh`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ refreshToken })
@@ -55,7 +56,7 @@ export const AuthProvider = ({ children }) => {
  setToken(data.accessToken);
  
  // Fetch user info again
- const meRes = await fetch('http://localhost:5000/api/auth/crm/me', {
+ const meRes = await fetch(`${API_URL}/api/auth/crm/me`, {
  headers: { 'Authorization': `Bearer ${data.accessToken}` }
  });
  const meData = await meRes.json();
@@ -74,7 +75,7 @@ export const AuthProvider = ({ children }) => {
  };
 
  const login = async (email, password) => {
- const res = await fetch('http://localhost:5000/api/auth/crm/login', {
+ const res = await fetch(`${API_URL}/api/auth/crm/login`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ email, password })
@@ -92,7 +93,7 @@ export const AuthProvider = ({ children }) => {
  };
 
  const register = async (name, email, password, role) => {
- const res = await fetch('http://localhost:5000/api/auth/crm/register', {
+ const res = await fetch(`${API_URL}/api/auth/crm/register`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ name, email, password, role })
@@ -113,7 +114,7 @@ export const AuthProvider = ({ children }) => {
  const refreshToken = localStorage.getItem('crm_refresh_token');
  if (refreshToken) {
  try {
- await fetch('http://localhost:5000/api/auth/crm/logout', {
+ await fetch(`${API_URL}/api/auth/crm/logout`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ refreshToken })
