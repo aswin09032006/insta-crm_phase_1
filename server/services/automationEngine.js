@@ -43,6 +43,7 @@ class AutomationEngine {
               matchedStep = nextStep;
               isAdvancingSequence = true;
               lead.activePathStepIndex = nextStepIndex;
+              lead.isPipelineLead = true;
             }
           }
         }
@@ -70,6 +71,7 @@ class AutomationEngine {
                 }
                 lead.activePathId = path.id;
                 lead.activePathStepIndex = 0;
+                lead.isPipelineLead = true;
                 break; // Stop at first matched path
               }
             }
