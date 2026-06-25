@@ -300,11 +300,11 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/*" element={<MainApp />} />
-              <Route path="/meta-review" element={<MetaReviewDashboard />} />
+              {/* <Route path="/meta-review" element={<MetaReviewDashboard />} />
               <Route
                 path="/meta-review/checklist"
                 element={<MetaReviewChecklist />}
-              />
+              /> */}
             </Routes>
           </BrowserRouter>
         </AuthProvider>

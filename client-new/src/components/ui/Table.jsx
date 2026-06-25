@@ -9,10 +9,15 @@ export default function Table({
  itemsPerPage = 10,
  onRowClick,
  onVisibleDataChange,
+ currentPage: controlledCurrentPage,
+ onPageChange,
  className = ''
 }) {
  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
- const [currentPage, setCurrentPage] = useState(1);
+ const [internalPage, setInternalPage] = useState(1);
+
+ const currentPage = controlledCurrentPage !== undefined ? controlledCurrentPage : internalPage;
+ const setCurrentPage = onPageChange || setInternalPage;
 
  // Handle sort
  const handleSort = (key) => {
@@ -155,7 +160,7 @@ export default function Table({
  variant="outline" 
  size="sm" 
  disabled={currentPage === 1}
- onClick={() => setCurrentPage(p => p - 1)}
+ onClick={() => setCurrentPage(currentPage - 1)}
  >
  <ChevronLeft size={16} /> Previous
  </Button>
@@ -163,7 +168,7 @@ export default function Table({
  variant="outline" 
  size="sm" 
  disabled={currentPage === totalPages}
- onClick={() => setCurrentPage(p => p + 1)}
+ onClick={() => setCurrentPage(currentPage + 1)}
  >
  Next <ChevronRight size={16} />
  </Button>

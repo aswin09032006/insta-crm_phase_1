@@ -769,6 +769,8 @@ export default function LeadsPipeline() {
   columns={tableColumns} 
   data={leads} 
   itemsPerPage={10} 
+  currentPage={currentPage}
+  onPageChange={setCurrentPage}
   onRowClick={(lead) => setSelectedLeadId(lead._id)}
   onVisibleDataChange={(data) => setVisibleLeads(data)}
   />
