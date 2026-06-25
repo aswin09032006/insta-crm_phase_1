@@ -129,10 +129,10 @@ const Sidebar = ({ isCollapsed, onToggle, isMobileOpen, onMobileClose }) => {
  </div>
  )}
  </nav>
-
+{/* 
  <div className="px-4 pb-4 shrink-0">
  <NavItem to="/meta-review" icon={Link} label="Account" isCollapsed={isCollapsed} isMobileOpen={isMobileOpen} onMobileClose={onMobileClose} />
- </div>
+ </div> */}
 
  {/* Sidebar Footer */}
  <div className={`shrink-0 border-t border-[var(--color-border-subtle)] p-4`}>

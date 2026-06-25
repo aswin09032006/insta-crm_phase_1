@@ -80,22 +80,24 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
     if (startLimit && endLimit) {
       dateQuery.createdAt = { $gte: startLimit, $lte: endLimit };
     }
+    const leadQuery = { ...dateQuery, isPipelineLead: true };
 
-    const totalLeads = await Lead.countDocuments(dateQuery);
-    const wonLeads = await Lead.countDocuments({ ...dateQuery, stage: 'Won' });
+    const totalLeads = await Lead.countDocuments(leadQuery);
+    const hotLeads = await Lead.countDocuments({ ...leadQuery, priority: 'hot' });
+    const wonLeads = await Lead.countDocuments({ ...leadQuery, stage: 'Won' });
     const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : 0;
     
     // Calculate distributions
-    const newCount = await Lead.countDocuments({ ...dateQuery, status: 'new' });
-    const contactedCount = await Lead.countDocuments({ ...dateQuery, status: 'contacted' });
-    const qualifiedCount = await Lead.countDocuments({ ...dateQuery, status: 'qualified' });
-    const convertedCount = await Lead.countDocuments({ ...dateQuery, status: 'converted' });
-    const lostCount = await Lead.countDocuments({ ...dateQuery, status: 'lost' });
+    const newCount = await Lead.countDocuments({ ...leadQuery, status: 'new' });
+    const contactedCount = await Lead.countDocuments({ ...leadQuery, status: 'contacted' });
+    const qualifiedCount = await Lead.countDocuments({ ...leadQuery, status: 'qualified' });
+    const convertedCount = await Lead.countDocuments({ ...leadQuery, status: 'converted' });
+    const lostCount = await Lead.countDocuments({ ...leadQuery, status: 'lost' });
 
     // Calculate sources
-    const dmCount = await Lead.countDocuments({ ...dateQuery, source: 'dm' });
-    const commentCount = await Lead.countDocuments({ ...dateQuery, source: 'comment' });
-    const manualCount = await Lead.countDocuments({ ...dateQuery, source: 'manual' });
+    const dmCount = await Lead.countDocuments({ ...leadQuery, source: 'dm' });
+    const commentCount = await Lead.countDocuments({ ...leadQuery, source: 'comment' });
+    const manualCount = await Lead.countDocuments({ ...leadQuery, source: 'manual' });
 
     // Calculate social
     const incomingDMs = await Message.countDocuments({ ...dateQuery, direction: 'inbound' });
@@ -136,7 +138,7 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
     ]);
 
     const leadsData = await Lead.aggregate([
-      { $match: { createdAt: { $gte: chartStart, $lte: chartEnd } } },
+      { $match: { isPipelineLead: true, createdAt: { $gte: chartStart, $lte: chartEnd } } },
       { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
     ]);
 
@@ -167,7 +169,7 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
     res.json({
       leads: { 
         total: totalLeads, 
-        hot: 0, 
+        hot: hotLeads, 
         conversionRate, 
         distribution: { new: newCount, contacted: contactedCount, qualified: qualifiedCount, converted: convertedCount, lost: lostCount }, 
         sources: { dm: dmCount, comment: commentCount, manual: manualCount } 

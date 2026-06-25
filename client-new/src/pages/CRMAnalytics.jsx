@@ -179,7 +179,9 @@ export default function CRMAnalytics() {
  <div className="card-panel p-6 flex flex-col gap-4 relative overflow-hidden group">
  <div className="flex items-center gap-2">
  <span className="text-sm font-medium text-[var(--color-text-muted)]">Total Leads</span>
- <AlertCircle size={14} className="text-[var(--color-text-light)]" />
+ <span title="Total number of leads in the CRM" className="flex items-center cursor-help">
+   <AlertCircle size={14} className="text-[var(--color-text-light)]" />
+ </span>
  </div>
  <div className="flex items-end gap-3">
  <h3 className="text-2xl font-bold text-[var(--color-text-main)] leading-none">{leads.total}</h3>
@@ -190,7 +192,9 @@ export default function CRMAnalytics() {
  <div className="card-panel p-6 flex flex-col gap-4 relative overflow-hidden group">
  <div className="flex items-center gap-2">
  <span className="text-sm font-medium text-[var(--color-text-muted)]">Hot Leads</span>
- <AlertCircle size={14} className="text-[var(--color-text-light)]" />
+ <span title="Leads marked with high priority" className="flex items-center cursor-help">
+   <AlertCircle size={14} className="text-[var(--color-text-light)]" />
+ </span>
  </div>
  <div className="flex items-end gap-3">
  <h3 className="text-2xl font-bold text-[var(--color-text-main)] leading-none">{leads.hot}</h3>
@@ -202,7 +206,9 @@ export default function CRMAnalytics() {
  <div className="card-panel p-6 flex flex-col gap-4 relative overflow-hidden group">
  <div className="flex items-center gap-2">
  <span className="text-sm font-medium text-[var(--color-text-muted)]">Conversion Rate</span>
- <AlertCircle size={14} className="text-[var(--color-text-light)]" />
+ <span title="Percentage of leads marked as Converted" className="flex items-center cursor-help">
+   <AlertCircle size={14} className="text-[var(--color-text-light)]" />
+ </span>
  </div>
  <div className="flex items-end gap-3">
  <h3 className="text-2xl font-bold text-[var(--color-text-main)] leading-none">{leads.conversionRate}%</h3>
@@ -214,7 +220,9 @@ export default function CRMAnalytics() {
  <div className="card-panel p-6 flex flex-col gap-4 relative overflow-hidden group">
  <div className="flex items-center gap-2">
  <span className="text-sm font-medium text-[var(--color-text-muted)]">Tasks</span>
- <AlertCircle size={14} className="text-[var(--color-text-light)]" />
+ <span title="Tasks requiring attention" className="flex items-center cursor-help">
+   <AlertCircle size={14} className="text-[var(--color-text-light)]" />
+ </span>
  </div>
  <div className="flex items-end gap-3">
  <h3 className="text-2xl font-bold text-[var(--color-text-main)] leading-none">{tasks.pending}</h3>
@@ -364,12 +372,9 @@ export default function CRMAnalytics() {
  </div>
  </div>
  </div>
+  </div>
+  </div>
 
- <div className="mt-6 pt-4 border-t border-[var(--color-border-subtle)]/50 text-xs text-[var(--color-text-muted)] text-center font-normal">
- Linked platform stats from Instagram Graph API and local database buffers.
- </div>
- </div>
- </div>
 
  {/* Leads Generation Volume (Separated Chart) */}
  <div className="card-panel p-5 bg-[var(--color-bg-card)] transition-colors duration-300">
