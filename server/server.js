@@ -84,7 +84,7 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
 
     const totalLeads = await Lead.countDocuments(leadQuery);
     const hotLeads = await Lead.countDocuments({ ...leadQuery, priority: 'hot' });
-    const wonLeads = await Lead.countDocuments({ ...leadQuery, stage: 'Won' });
+    const wonLeads = await Lead.countDocuments({ ...leadQuery, status: 'converted' });
     const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : 0;
     
     // Calculate distributions
@@ -181,6 +181,24 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
     });
   } catch(err) {
     res.status(500).json({ error: 'Failed' });
+  }
+});
+
+app.get('/api/analytics/wordcloud', require('./middleware/authMiddleware').protect, async (req, res) => {
+  try {
+    const Setting = require('./models/Setting');
+    const { calculateWordCloud } = require('./services/cronService');
+
+    let cache = await Setting.findOne({ key: 'wordcloud_cache' });
+    
+    if (!cache || !cache.value) {
+      const data = await calculateWordCloud();
+      return res.status(200).json(data || []);
+    }
+
+    res.status(200).json(cache.value);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -324,6 +342,15 @@ app.put('/api/auth/crm/users/:id', require('./middleware/authMiddleware').protec
   const User = require('./models/User');
   const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true}).select('-password');
   res.json(user);
+});
+app.delete('/api/auth/crm/users/:id', require('./middleware/authMiddleware').protect, async (req, res) => {
+  try {
+    const User = require('./models/User');
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 app.use('/api/rules-templates', require('./routes/crmRulesTemplates')); // Maps /api/rules-templates/rules
 
