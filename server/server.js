@@ -186,7 +186,7 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
 app.get('/api/leads', require('./middleware/authMiddleware').protect, async (req, res) => {
   try {
     const Lead = require('./models/Lead');
-    const query = {};
+    const query = { isPipelineLead: true };
 
     if (req.query.search) {
       query.$or = [
@@ -235,7 +235,8 @@ app.get('/api/leads', require('./middleware/authMiddleware').protect, async (req
 app.post('/api/leads', require('./middleware/authMiddleware').protect, async (req, res) => {
   const Lead = require('./models/Lead');
   try {
-    const newLead = await Lead.create(req.body);
+    const leadData = { ...req.body, isPipelineLead: true };
+    const newLead = await Lead.create(leadData);
     res.json(newLead);
   } catch (err) {
     res.status(400).json({ error: err.message });

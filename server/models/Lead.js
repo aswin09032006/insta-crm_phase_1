@@ -46,6 +46,10 @@ const leadSchema = new mongoose.Schema({
   notes: {
     type: String
   },
+  isPipelineLead: {
+    type: Boolean,
+    default: false
+  },
   activePathId: {
     type: String
   },
