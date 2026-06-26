@@ -85,7 +85,12 @@ router.post('/', async (req, res) => {
       assignedTo: req.body.assignedTo !== undefined ? req.body.assignedTo : req.user._id,
       createdBy: req.user._id
     });
-    res.status(201).json(task);
+    
+    const populatedTask = await Task.findById(task._id)
+      .populate('assignedTo', 'name email')
+      .populate('leadId', 'username');
+      
+    res.status(201).json(populatedTask);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create task', details: err.message });
@@ -94,7 +99,9 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true })
+      .populate('assignedTo', 'name email')
+      .populate('leadId', 'username');
     res.json(task);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update task' });
