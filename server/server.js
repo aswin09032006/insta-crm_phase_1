@@ -222,6 +222,15 @@ app.get('/api/leads', require('./middleware/authMiddleware').protect, async (req
     // Role-based restrictions
     if (req.user && req.user.role === 'agent') {
       query.assignedTo = req.user._id;
+    } else if (req.query.assignedTo) {
+      // Admin filtering by specific agent
+      if (req.query.assignedTo === 'unassigned') {
+        query.assignedTo = null;
+      } else if (req.query.assignedTo === 'me') {
+        query.assignedTo = req.user._id;
+      } else {
+        query.assignedTo = req.query.assignedTo;
+      }
     } else if (req.query.assignedToMe === 'true') {
       query.assignedTo = req.user._id;
     }
@@ -470,6 +479,26 @@ app.get('/api/leads/agents', require('./middleware/authMiddleware').protect, asy
     res.json(agents);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch agents' });
+  }
+});
+app.get('/api/leads/posts-with-leads', require('./middleware/authMiddleware').protect, async (req, res) => {
+  try {
+    const Comment = require('./models/Comment');
+    const Lead = require('./models/Lead');
+    
+    // Find all pipeline leads that came from comments
+    const commentLeads = await Lead.find({ isPipelineLead: true, source: 'comment' }).select('_id');
+    const leadIds = commentLeads.map(l => l._id);
+    
+    // Get distinct mediaIds from comments linked to those leads
+    const mediaIds = await Comment.distinct('mediaId', { 
+      leadId: { $in: leadIds },
+      mediaId: { $ne: null, $exists: true }
+    });
+    
+    res.json(mediaIds);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch posts with leads' });
   }
 });
 app.get('/api/leads/:id/timeline', require('./middleware/authMiddleware').protect, async (req, res) => {

@@ -87,7 +87,6 @@ export default function TasksPage() {
  const [isDeleting, setIsDeleting] = useState(false);
 
  useEffect(() => {
- if (user?.role === 'admin') {
  const fetchAgents = async () => {
  try {
  const res = await fetch(`${API_URL}/api/leads/agents`, {
@@ -101,9 +100,8 @@ export default function TasksPage() {
  console.error('Failed to fetch agents:', err);
  }
  };
- fetchAgents();
- }
- }, [user, token]);
+ if (token) fetchAgents();
+ }, [token]);
 
  const fetchTasks = async () => {
  try {
@@ -161,7 +159,8 @@ export default function TasksPage() {
  type: editingTask.type,
  dueAt: editingTask.dueAt,
  notes: editingTask.notes,
- priority: editingTask.priority
+ priority: editingTask.priority,
+ assignedTo: editingTask.assignedTo === 'unassigned' ? null : (editingTask.assignedTo || null)
  })
  });
 
@@ -450,8 +449,7 @@ export default function TasksPage() {
  )}
  </div>
 
-  {/* Admin Assignee Filter */}
-  {user?.role === 'admin' && (
+  {/* Assignee Filter */}
   <div className="relative" ref={agentMenuRef}>
   <button
   onClick={() => setShowAgentMenu(!showAgentMenu)}
@@ -486,7 +484,6 @@ export default function TasksPage() {
   </div>
   )}
   </div>
-  )}
 
  {/* Multi-Select Filters */}
  <div className="relative" ref={filterMenuRef}>
@@ -739,6 +736,22 @@ export default function TasksPage() {
  className="w-full"
  />
  </div>
+ 
+  <div className="space-y-1.5">
+  <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Assign To</label>
+  <CustomSelect
+  value={editingTask?.assignedTo?._id || editingTask?.assignedTo || 'unassigned'}
+  onChange={(e) => setEditingTask({...editingTask, assignedTo: e.target.value})}
+  options={[
+    { value: "unassigned", label: "Unassigned" },
+    ...(user ? [{ value: user.id || user._id, label: "Assign to Me" }] : []),
+    ...systemAgents
+      .filter(a => String(a._id) !== String(user?.id || user?._id))
+      .map(a => ({ value: a._id, label: `${a.name} (${a.role})` }))
+  ]}
+  className="w-full"
+  />
+  </div>
 
  <div className="space-y-1.5">
  <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Status</label>

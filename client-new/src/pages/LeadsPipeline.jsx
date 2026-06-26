@@ -42,7 +42,7 @@ const COLUMNS = [
 ];
 
 export default function LeadsPipeline() {
- const { token } = useAuth();
+ const { token, user } = useAuth();
  const draggingRef = useRef(false);
  const [leads, setLeads] = useState([]);
  const [loading, setLoading] = useState(true);
@@ -51,9 +51,12 @@ export default function LeadsPipeline() {
  const [statusFilters, setStatusFilters] = useState(['new']);
  const [sourceFilter, setSourceFilter] = useState('');
  const [posts, setPosts] = useState([]);
+ const [postsWithLeads, setPostsWithLeads] = useState([]);
  const [postFilter, setPostFilter] = useState('');
  const [sortBy, setSortBy] = useState('updated_desc');
  const [assignedToMe, setAssignedToMe] = useState(false);
+ const [agentFilter, setAgentFilter] = useState('');
+ const [agents, setAgents] = useState([]);
  const [showStatusMenu, setShowStatusMenu] = useState(false);
  const statusMenuRef = useRef(null);
  const [datePreset, setDatePreset] = useState('all');
@@ -112,6 +115,17 @@ export default function LeadsPipeline() {
  }, []);
 
  useEffect(() => {
+    if (token && user?.role === 'admin') {
+      fetch(`${API_URL}/api/leads/agents`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data)) setAgents(data); })
+      .catch(err => console.error('Failed to fetch agents:', err));
+    }
+  }, [token, user]);
+
+ useEffect(() => {
     const fetchPosts = async () => {
       let allFetchedPosts = [];
       let afterMedia = null;
@@ -146,6 +160,18 @@ export default function LeadsPipeline() {
           break;
         }
       }
+
+      try {
+        const pWLRes = await fetch(`${API_URL}/api/leads/posts-with-leads`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (pWLRes.ok) {
+          const pWLData = await pWLRes.json();
+          setPostsWithLeads(pWLData);
+        }
+      } catch (err) {
+        console.error("Error fetching posts with leads:", err);
+      }
     };
     if (token) fetchPosts();
   }, [token]);
@@ -158,7 +184,11 @@ export default function LeadsPipeline() {
  if (statusFilters.length > 0) params.append('status', statusFilters.join(','));
  if (sourceFilter) params.append('source', sourceFilter);
  if (postFilter) params.append('postId', postFilter);
- if (assignedToMe) params.append('assignedToMe', 'true');
+ if (user?.role === 'admin' && agentFilter) {
+    params.append('assignedTo', agentFilter);
+  } else if (assignedToMe) {
+    params.append('assignedToMe', 'true');
+  }
  
  if (datePreset !== 'all') {
    const now = new Date();
@@ -218,7 +248,7 @@ export default function LeadsPipeline() {
  setCurrentPage(1);
  fetchLeads();
  }
- }, [token, search, priorityFilter, statusFilters, sortBy, sourceFilter, postFilter, assignedToMe, datePreset, customStartDate, customEndDate]);
+ }, [token, search, priorityFilter, statusFilters, sortBy, sourceFilter, postFilter, assignedToMe, agentFilter, datePreset, customStartDate, customEndDate]);
 
  const handleUpdateStatus = async (leadId, newStatus) => {
  // Save original state for potential rollback
@@ -517,7 +547,21 @@ export default function LeadsPipeline() {
  </div>
 
  <div className="flex items-center gap-3 shrink-0">
- {/* Assigned to Me Toggle */}
+ {/* Agent Filter (Admin) or Assigned to Me Toggle (Agent) */}
+ {user?.role === 'admin' ? (
+ <CustomSelect
+  value={agentFilter}
+  onChange={(e) => { setAgentFilter(e.target.value); setAssignedToMe(false); }}
+  options={[
+    { value: "", label: "All Agents" },
+    { value: "me", label: "Assigned to Me" },
+    { value: "unassigned", label: "Unassigned" },
+    ...agents
+      .filter(a => String(a._id) !== String(user?.id || user?._id))
+      .map(a => ({ value: a._id, label: `${a.name} (${a.role})` }))
+  ]}
+ />
+ ) : (
  <Button
  onClick={() => setAssignedToMe(!assignedToMe)}
  variant={assignedToMe ? 'primary' : 'outline'}
@@ -526,6 +570,7 @@ export default function LeadsPipeline() {
  >
  Assigned to Me
  </Button>
+ )}
 
  {/* View Mode Switcher */}
  <div className="flex items-center border border-[var(--color-border-subtle)] rounded-xl bg-[var(--color-bg-card)] p-0.5 shrink-0">
@@ -588,7 +633,9 @@ export default function LeadsPipeline() {
  className="min-w-[250px] sm:w-[250px] md:w-[250px]"
  options={[
  { value: "", label: "All Posts" },
- ...posts.map(p => {
+ ...posts
+ .filter(p => postsWithLeads.includes(p.id))
+ .map(p => {
    const postDate = p.timestamp ? new Date(p.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : '';
    const captionText = p.caption ? (p.caption.length > 30 ? p.caption.substring(0, 30) + '...' : p.caption) : 'Post ' + p.id;
    return {
@@ -715,7 +762,7 @@ export default function LeadsPipeline() {
             { value: "normal", label: <span className="flex items-center gap-1.5"><User size={14} className="text-[var(--color-text-muted)]" /> Normal Leads</span> }
           ]}
         />
-        {(statusFilters.length > 0 || priorityFilter !== 'all' || sourceFilter !== '' || postFilter !== '' || datePreset !== 'all' || sortBy !== 'updated_desc' || search !== '') && (
+        {(statusFilters.length > 0 || priorityFilter !== 'all' || sourceFilter !== '' || postFilter !== '' || datePreset !== 'all' || sortBy !== 'updated_desc' || search !== '' || agentFilter !== '') && (
           <button
             onClick={() => {
               setSearch('');
@@ -727,6 +774,8 @@ export default function LeadsPipeline() {
               setCustomStartDate('');
               setCustomEndDate('');
               setSortBy('updated_desc');
+              setAgentFilter('');
+              setAssignedToMe(false);
             }}
             className="text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors flex items-center gap-1.5 px-3 py-2 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-focus)] rounded-xl h-[42px]"
           >
