@@ -130,17 +130,17 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
     if (period === '24h') {
       const msgsData = await Message.aggregate([
         { $match: { createdAt: { $gte: chartStart, $lte: chartEnd }, direction: 'inbound' } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d %H", date: "$createdAt" } }, count: { $sum: 1 } } }
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d %H", date: "$createdAt", timezone: "Asia/Kolkata" } }, count: { $sum: 1 } } }
       ]);
 
       const commentsData = await Comment.aggregate([
         { $match: { createdAt: { $gte: chartStart, $lte: chartEnd }, direction: 'inbound' } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d %H", date: "$createdAt" } }, count: { $sum: 1 } } }
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d %H", date: "$createdAt", timezone: "Asia/Kolkata" } }, count: { $sum: 1 } } }
       ]);
 
       const leadsData = await Lead.aggregate([
         { $match: { isPipelineLead: true, createdAt: { $gte: chartStart, $lte: chartEnd } } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d %H", date: "$createdAt" } }, count: { $sum: 1 } } }
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d %H", date: "$createdAt", timezone: "Asia/Kolkata" } }, count: { $sum: 1 } } }
       ]);
 
       const msgsMap = msgsData.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {});
@@ -149,9 +149,11 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
 
       for (let i = 23; i >= 0; i--) {
         const d = new Date(chartEnd);
-        d.setHours(d.getHours() - i);
-        const label = `${d.getHours().toString().padStart(2, '0')}:00`;
-        const dateStr = d.toISOString().split(':')[0].replace('T', ' ');
+        const istDate = new Date(d.getTime() + (5.5 * 60 * 60 * 1000));
+        istDate.setUTCHours(istDate.getUTCHours() - i);
+        
+        const label = `${istDate.getUTCHours().toString().padStart(2, '0')}:00`;
+        const dateStr = istDate.toISOString().split(':')[0].replace('T', ' ');
 
         chartData.push({
           day: label,
@@ -169,17 +171,17 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
 
       const msgsData = await Message.aggregate([
         { $match: { createdAt: { $gte: chartStart, $lte: chartEnd }, direction: 'inbound' } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Asia/Kolkata" } }, count: { $sum: 1 } } }
       ]);
 
       const commentsData = await Comment.aggregate([
         { $match: { createdAt: { $gte: chartStart, $lte: chartEnd }, direction: 'inbound' } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Asia/Kolkata" } }, count: { $sum: 1 } } }
       ]);
 
       const leadsData = await Lead.aggregate([
         { $match: { isPipelineLead: true, createdAt: { $gte: chartStart, $lte: chartEnd } } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Asia/Kolkata" } }, count: { $sum: 1 } } }
       ]);
 
       const msgsMap = msgsData.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {});
@@ -188,13 +190,14 @@ app.get('/api/analytics/dashboard', require('./middleware/authMiddleware').prote
 
       for(let i = daysToIterate - 1; i >= 0; i--) {
         const d = new Date(chartEnd);
-        d.setDate(d.getDate() - i);
+        const istDate = new Date(d.getTime() + (5.5 * 60 * 60 * 1000));
+        istDate.setUTCDate(istDate.getUTCDate() - i);
         
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = istDate.toISOString().split('T')[0];
         
-        let label = days[d.getDay()];
+        let label = days[istDate.getUTCDay()];
         if (daysToIterate > 14) {
-          label = `${d.getMonth()+1}/${d.getDate()}`;
+          label = `${istDate.getUTCMonth()+1}/${istDate.getUTCDate()}`;
         }
         
         chartData.push({
