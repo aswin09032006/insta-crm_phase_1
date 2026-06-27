@@ -554,7 +554,7 @@ export default function CRMRules({ settings, setSettings, handleSaveSettings, sa
         <div className="flex items-start gap-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-lg p-2.5">
           <Info size={14} className="text-[var(--color-primary)] shrink-0 mt-0.5" />
           <p className="text-xs text-[var(--color-text-muted)]">
-            This step will only advance when the user's message contains a valid Indian mobile number (10 digits starting with 6-9). The phone number will be <strong>automatically saved</strong> to the lead's profile.
+            This step will only advance when the user's message contains a valid phone number (7-15 digits, with optional country code like +91, +1, +44). The phone number will be <strong>automatically saved</strong> to the lead's profile.
           </p>
         </div>
         )}

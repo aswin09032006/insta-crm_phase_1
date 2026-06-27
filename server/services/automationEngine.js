@@ -50,7 +50,8 @@ class AutomationEngine {
       }
 
       // 2. If not advancing a sequence, and it's an inbound event, see if it triggers a NEW sequence
-      if (!isAdvancingSequence && !isOutbound && settings.leadConversionLogic === 'sequence' && settings.leadConversionRules) {
+      // Skip if lead is already in an active path (they should stay parked until they meet the next step's condition)
+      if (!isAdvancingSequence && !isOutbound && !(lead && lead.activePathId) && settings.leadConversionLogic === 'sequence' && settings.leadConversionRules) {
         for (const path of settings.leadConversionRules) {
           if (path.isActive === false) continue;
           
@@ -115,8 +116,8 @@ class AutomationEngine {
 
     // Handle 'contains_phone' match type
     if (step.matchType === 'contains_phone') {
-      const text = (eventData.text || '').replace(/[\s\-\.]/g, ''); // strip spaces, dashes, dots
-      const phoneRegex = /(?:\+?91)?([6-9]\d{9})/;
+      const text = (eventData.text || '').replace(/[\s\-\.\(\)]/g, ''); // strip spaces, dashes, dots, parentheses
+      const phoneRegex = /(\+?\d{7,15})/;
       const match = text.match(phoneRegex);
       if (match) {
         // Store the extracted phone number on eventData so executeRuleActions can save it
