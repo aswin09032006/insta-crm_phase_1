@@ -113,7 +113,20 @@ class AutomationEngine {
       }
     }
 
-    // Check keywords
+    // Handle 'contains_phone' match type
+    if (step.matchType === 'contains_phone') {
+      const text = (eventData.text || '').replace(/[\s\-\.]/g, ''); // strip spaces, dashes, dots
+      const phoneRegex = /(?:\+?91)?([6-9]\d{9})/;
+      const match = text.match(phoneRegex);
+      if (match) {
+        // Store the extracted phone number on eventData so executeRuleActions can save it
+        eventData._extractedPhone = match[1];
+        return true;
+      }
+      return false;
+    }
+
+    // Check keywords (default matchType)
     if (!step.keywords || step.keywords.trim() === '') return true; // Empty means catch-all
 
     const text = (eventData.text || '').toLowerCase().trim();
@@ -128,6 +141,12 @@ class AutomationEngine {
     const isHot = path.isHot === true;
     
     let autoAdvanced = false;
+
+    // Save extracted phone number to lead (only if not already present)
+    if (eventData._extractedPhone && !lead.phone) {
+      lead.phone = eventData._extractedPhone;
+      console.log(`[Automation Engine] Extracted phone number ${eventData._extractedPhone} for lead ${lead.username}`);
+    }
 
     // Check if this is the final step in the sequence
     const isFinalStep = lead.activePathStepIndex === (path.sequence.length - 1);

@@ -511,6 +511,27 @@ export default function CRMRules({ settings, setSettings, handleSaveSettings, sa
 
       <div className="pl-9 space-y-3">
         <div>
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] mb-1">Match Type</label>
+          <CustomSelect
+            value={stepObj.matchType || 'contains'}
+            disabled={isLocked}
+            onChange={(e) => {
+              const newRules = [...settings.leadConversionRules];
+              const newSeq = [...newRules[ruleIdx].sequence];
+              newSeq[idx] = { ...stepObj, matchType: e.target.value };
+              newRules[ruleIdx].sequence = newSeq;
+              setSettings({ ...settings, leadConversionRules: newRules });
+            }}
+            options={[
+              { value: "contains", label: "Contains Keyword" },
+              { value: "contains_phone", label: "Contains Phone Number" }
+            ]}
+            className="w-full"
+          />
+        </div>
+
+        {(stepObj.matchType || 'contains') === 'contains' && (
+        <div>
           <label className="block text-xs font-semibold text-[var(--color-text-muted)] mb-1">Trigger Keywords (Comma separated, Optional)</label>
           <input 
             type="text" 
@@ -527,6 +548,16 @@ export default function CRMRules({ settings, setSettings, handleSaveSettings, sa
             }}
           />
         </div>
+        )}
+
+        {stepObj.matchType === 'contains_phone' && (
+        <div className="flex items-start gap-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-lg p-2.5">
+          <Info size={14} className="text-[var(--color-primary)] shrink-0 mt-0.5" />
+          <p className="text-xs text-[var(--color-text-muted)]">
+            This step will only advance when the user's message contains a valid Indian mobile number (10 digits starting with 6-9). The phone number will be <strong>automatically saved</strong> to the lead's profile.
+          </p>
+        </div>
+        )}
 
         {(stepObj.type === 'comment_received' || stepObj.type === 'admin_replied_comment') && (
           <div>
