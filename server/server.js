@@ -413,7 +413,15 @@ app.post('/api/auth/crm/create-agent', require('./middleware/authMiddleware').pr
 });
 app.put('/api/auth/crm/users/:id', require('./middleware/authMiddleware').protect, async (req, res) => {
   const User = require('./models/User');
-  const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true}).select('-password');
+  const updateData = { ...req.body };
+  
+  if (updateData.password) {
+    const bcrypt = require('bcrypt');
+    const salt = await bcrypt.genSalt(10);
+    updateData.password = await bcrypt.hash(updateData.password, salt);
+  }
+  
+  const user = await User.findByIdAndUpdate(req.params.id, updateData, {new: true}).select('-password');
   res.json(user);
 });
 app.delete('/api/auth/crm/users/:id', require('./middleware/authMiddleware').protect, async (req, res) => {
